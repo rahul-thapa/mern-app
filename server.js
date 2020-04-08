@@ -1,30 +1,42 @@
 const express = require('express')
 const mongoose = require('mongoose')
-const bodyparser = require('body-parser')
+/// routes
 const items = require('./routes/api/items')
-const path = require('path')
+const users = require('./routes/api/users')
+const auth = require('./routes/api/auth')
 
+
+const path = require('path')
+const config = require('config')
 const app = express()
 
 
 
 // Bodyparser middleware
-app.use(bodyparser.json())
+app.use(express.json())
 
 //DB Config
 
-const db = require('./config/keys').mongoURI
+const db = config.get('mongoURI')
 
 // Connect to DB
 
 mongoose
-    .connect(db)
+    .connect(db, {
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        useUnifiedTopology: true
+    })
     .then(()=>console.log("DB Connected"))
     .catch(err=>console.log(err))
 
 
 // Use routes
 app.use('/api/items', items)
+app.use('/api/users', users)
+app.use('/api/auth', auth)
+
+
 
 // Serve static files
 
@@ -37,8 +49,8 @@ if(process.env.NODE_ENV==="production"){
 }
 
 
-const server_port = process.env.YOUR_PORT || process.env.PORT || 80;
+const server_port = process.env.YOUR_PORT || process.env.PORT || 5000;
 const server_host = process.env.YOUR_HOST || '0.0.0.0';
-server.listen(server_port, server_host, function() {
+app.listen(server_port, server_host, function() {
     console.log('Listening on port %d', server_port);
 });
